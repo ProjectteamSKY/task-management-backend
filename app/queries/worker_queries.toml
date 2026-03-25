@@ -1,0 +1,11 @@
+[worker]
+
+create = """
+INSERT INTO workers (name, email, role, department, status, avatar, daily_capacity_hours)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING *;
+"""
+
+get_all = "SELECT * FROM workers;"
+
+get_by_id = "SELECT * FROM workers WHERE id=$1;"

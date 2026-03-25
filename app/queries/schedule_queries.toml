@@ -1,0 +1,18 @@
+[schedule]
+
+create = """
+INSERT INTO schedule_slots (worker_id, task_id, date, start_time, end_time, duration_units, status)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING *;
+"""
+
+get_all = """
+SELECT s.*, w.name as worker_name, t.title as task_title
+FROM schedule_slots s
+LEFT JOIN workers w ON s.worker_id = w.id
+LEFT JOIN tasks t ON s.task_id = t.id;
+"""
+
+get_by_worker = """
+SELECT * FROM schedule_slots WHERE worker_id=$1;
+"""
