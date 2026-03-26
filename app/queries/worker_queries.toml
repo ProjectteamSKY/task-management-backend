@@ -6,6 +6,30 @@ VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING *;
 """
 
-get_all = "SELECT * FROM workers;"
+get_all = """
+SELECT * FROM workers ORDER BY name;
+"""
 
-get_by_id = "SELECT * FROM workers WHERE id=$1;"
+get_by_id = """
+SELECT * FROM workers WHERE id = $1;
+"""
+
+get_by_department = """
+SELECT * FROM workers WHERE department = $1 ORDER BY name;
+"""
+
+get_with_tasks = """
+SELECT
+    w.*,
+    COUNT(ta.id)                                            AS total_assignments,
+    COUNT(ta.id) FILTER (WHERE ta.status = 'in_progress')  AS active_tasks,
+    COALESCE(SUM(ta.allocated_hours), 0)                    AS total_allocated_hours
+FROM workers w
+LEFT JOIN task_assignments ta ON w.id = ta.worker_id
+GROUP BY w.id
+ORDER BY w.name;
+"""
+
+update_status = """
+UPDATE workers SET status = $1 WHERE id = $2 RETURNING *;
+"""

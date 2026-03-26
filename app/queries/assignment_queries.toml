@@ -1,0 +1,111 @@
+[assignment]
+
+create = """
+INSERT INTO task_assignments (task_id, worker_id, allocated_hours, assigned_date, status)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING *;
+"""
+
+get_all = """
+SELECT
+    ta.*,
+    w.name        AS worker_name,
+    w.email       AS worker_email,
+    w.role        AS worker_role,
+    w.department  AS worker_department,
+    w.avatar      AS worker_avatar,
+    t.title       AS task_title,
+    t.status      AS task_status,
+    t.priority    AS task_priority,
+    t.task_type   AS task_type,
+    p.name        AS project_name
+FROM task_assignments ta
+JOIN workers  w ON ta.worker_id = w.id
+JOIN tasks    t ON ta.task_id   = t.id
+LEFT JOIN projects p ON t.project_id = p.id
+ORDER BY ta.assigned_date DESC;
+"""
+
+get_by_id = """
+SELECT
+    ta.*,
+    w.name        AS worker_name,
+    w.email       AS worker_email,
+    w.role        AS worker_role,
+    w.department  AS worker_department,
+    w.avatar      AS worker_avatar,
+    t.title       AS task_title,
+    t.status      AS task_status,
+    t.priority    AS task_priority,
+    t.task_type   AS task_type,
+    p.name        AS project_name
+FROM task_assignments ta
+JOIN workers  w ON ta.worker_id = w.id
+JOIN tasks    t ON ta.task_id   = t.id
+LEFT JOIN projects p ON t.project_id = p.id
+WHERE ta.id = $1;
+"""
+
+get_by_task = """
+SELECT
+    ta.*,
+    w.name        AS worker_name,
+    w.email       AS worker_email,
+    w.role        AS worker_role,
+    w.department  AS worker_department,
+    w.avatar      AS worker_avatar
+FROM task_assignments ta
+JOIN workers w ON ta.worker_id = w.id
+WHERE ta.task_id = $1
+ORDER BY ta.assigned_date;
+"""
+
+get_by_worker = """
+SELECT
+    ta.*,
+    t.title       AS task_title,
+    t.status      AS task_status,
+    t.priority    AS task_priority,
+    t.task_type   AS task_type,
+    t.estimated_hours,
+    p.name        AS project_name
+FROM task_assignments ta
+JOIN tasks    t ON ta.task_id   = t.id
+LEFT JOIN projects p ON t.project_id = p.id
+WHERE ta.worker_id = $1
+ORDER BY ta.assigned_date DESC;
+"""
+
+get_by_status = """
+SELECT
+    ta.*,
+    w.name        AS worker_name,
+    w.role        AS worker_role,
+    t.title       AS task_title,
+    t.priority    AS task_priority,
+    p.name        AS project_name
+FROM task_assignments ta
+JOIN workers  w ON ta.worker_id = w.id
+JOIN tasks    t ON ta.task_id   = t.id
+LEFT JOIN projects p ON t.project_id = p.id
+WHERE ta.status = $1
+ORDER BY ta.assigned_date DESC;
+"""
+
+update = """
+UPDATE task_assignments
+SET
+    allocated_hours = COALESCE($1, allocated_hours),
+    assigned_date   = COALESCE($2, assigned_date),
+    status          = COALESCE($3, status)
+WHERE id = $4
+RETURNING *;
+"""
+
+update_status = """
+UPDATE task_assignments SET status = $1 WHERE id = $2 RETURNING *;
+"""
+
+delete = """
+DELETE FROM task_assignments WHERE id = $1 RETURNING *;
+"""
