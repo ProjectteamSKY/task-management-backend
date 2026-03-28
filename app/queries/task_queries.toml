@@ -1,0 +1,51 @@
+[task]
+
+create = """
+INSERT INTO tasks (title, description, status, priority, task_type, estimated_hours, project_id, start_date, end_date)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING *;
+"""
+
+get_all = """
+SELECT
+    t.*,
+    p.name  AS project_name,
+    p.status AS project_status
+FROM tasks t
+LEFT JOIN projects p ON t.project_id = p.id
+ORDER BY t.created_at DESC;
+"""
+
+get_by_id = """
+SELECT
+    t.*,
+    p.name  AS project_name,
+    p.status AS project_status
+FROM tasks t
+LEFT JOIN projects p ON t.project_id = p.id
+WHERE t.id = $1;
+"""
+
+get_by_project = """
+SELECT
+    t.*,
+    p.name AS project_name
+FROM tasks t
+LEFT JOIN projects p ON t.project_id = p.id
+WHERE t.project_id = $1
+ORDER BY t.priority DESC, t.created_at DESC;
+"""
+
+get_by_status = """
+SELECT
+    t.*,
+    p.name AS project_name
+FROM tasks t
+LEFT JOIN projects p ON t.project_id = p.id
+WHERE t.status = $1
+ORDER BY t.created_at DESC;
+"""
+
+update_status = """
+UPDATE tasks SET status = $1 WHERE id = $2 RETURNING *;
+"""

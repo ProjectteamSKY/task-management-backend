@@ -1,0 +1,43 @@
+[worker_note]
+
+create = """
+INSERT INTO worker_notes (worker_id, notes)
+VALUES ($1, $2)
+RETURNING *;
+"""
+
+get_all = """
+SELECT *
+FROM worker_notes
+WHERE worker_id = $1
+ORDER BY created_at DESC;
+"""
+
+get_by_id = """
+SELECT *
+FROM worker_notes
+WHERE id = $1
+  AND worker_id = $2;
+"""
+
+update = """
+UPDATE worker_notes
+SET    notes      = $1,
+       updated_at = CURRENT_TIMESTAMP
+WHERE  id        = $2
+  AND  worker_id = $3
+RETURNING *;
+"""
+
+delete = """
+DELETE FROM worker_notes
+WHERE id        = $1
+  AND worker_id = $2
+RETURNING *;
+"""
+
+delete_all = """
+DELETE FROM worker_notes
+WHERE worker_id = $1
+RETURNING *;
+"""

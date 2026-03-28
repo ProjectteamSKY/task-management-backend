@@ -1,0 +1,85 @@
+[worker_resources]
+
+upsert_shift = """
+INSERT INTO worker_shift_schedules
+    (worker_id, shift_type, working_days, start_time, end_time, break_duration)
+VALUES ($1, $2, $3, $4, $5, $6)
+ON CONFLICT (worker_id) DO UPDATE
+SET shift_type     = EXCLUDED.shift_type,
+    working_days   = EXCLUDED.working_days,
+    start_time     = EXCLUDED.start_time,
+    end_time       = EXCLUDED.end_time,
+    break_duration = EXCLUDED.break_duration,
+    updated_at     = CURRENT_TIMESTAMP
+RETURNING *;
+"""
+
+get_shift = """
+SELECT * FROM worker_shift_schedules WHERE worker_id = $1;
+"""
+
+delete_shift = """
+DELETE FROM worker_shift_schedules WHERE worker_id = $1 RETURNING *;
+"""
+
+add_equipment = """
+INSERT INTO worker_equipment
+    (worker_id, name, equipment_ref, category, condition, assigned_date, return_date)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING *;
+"""
+
+get_equipment = """
+SELECT * FROM worker_equipment WHERE worker_id = $1 ORDER BY assigned_date DESC;
+"""
+
+update_equipment = """
+UPDATE worker_equipment
+SET name          = $1,
+    equipment_ref = $2,
+    category      = $3,
+    condition     = $4,
+    assigned_date = $5,
+    return_date   = $6,
+    updated_at    = CURRENT_TIMESTAMP
+WHERE id = $7 AND worker_id = $8
+RETURNING *;
+"""
+
+delete_equipment = """
+DELETE FROM worker_equipment WHERE id = $1 AND worker_id = $2 RETURNING *;
+"""
+
+add_training_development = """
+INSERT INTO worker_training_development
+    (worker_id, type, title, progress, due_date,
+     provider, category, status, start_date, end_date, notes)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING *;
+"""
+
+get_training_development = """
+SELECT * FROM worker_training_development
+WHERE worker_id = $1
+ORDER BY type, updated_at DESC;
+"""
+
+update_training_development = """
+UPDATE worker_training_development
+SET title      = $1,
+    progress   = $2,
+    due_date   = $3,
+    provider   = $4,
+    category   = $5,
+    status     = $6,
+    start_date = $7,
+    end_date   = $8,
+    notes      = $9,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $10 AND worker_id = $11
+RETURNING *;
+"""
+
+delete_training_development = """
+DELETE FROM worker_training_development WHERE id = $1 AND worker_id = $2 RETURNING *;
+"""

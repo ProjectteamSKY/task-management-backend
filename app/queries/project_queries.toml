@@ -1,0 +1,100 @@
+[project]
+
+create = """
+INSERT INTO projects (name, description, start_date, end_date, status)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING *;
+"""
+
+get_all = """
+SELECT
+    p.*,
+    COUNT(DISTINCT t.id)                                            AS total_tasks,
+    COUNT(DISTINCT t.id) FILTER (WHERE t.status = 'done')          AS completed_tasks,
+    COUNT(DISTINCT t.id) FILTER (WHERE t.status = 'in_progress')   AS active_tasks,
+    COUNT(DISTINCT ta.worker_id)                                    AS total_workers
+FROM projects p
+LEFT JOIN tasks t  ON t.project_id = p.id
+LEFT JOIN task_assignments ta ON ta.task_id = t.id
+GROUP BY p.id
+ORDER BY p.created_at DESC;
+"""
+
+get_by_id = """
+SELECT
+    p.*,
+    COUNT(DISTINCT t.id)                                            AS total_tasks,
+    COUNT(DISTINCT t.id) FILTER (WHERE t.status = 'done')          AS completed_tasks,
+    COUNT(DISTINCT t.id) FILTER (WHERE t.status = 'in_progress')   AS active_tasks,
+    COUNT(DISTINCT ta.worker_id)                                    AS total_workers
+FROM projects p
+LEFT JOIN tasks t  ON t.project_id = p.id
+LEFT JOIN task_assignments ta ON ta.task_id = t.id
+WHERE p.id = $1
+GROUP BY p.id;
+"""
+
+get_by_status = """
+SELECT
+    p.*,
+    COUNT(DISTINCT t.id)  AS total_tasks,
+    COUNT(DISTINCT ta.worker_id) AS total_workers
+FROM projects p
+LEFT JOIN tasks t  ON t.project_id = p.id
+LEFT JOIN task_assignments ta ON ta.task_id = t.id
+WHERE p.status = $1
+GROUP BY p.id
+ORDER BY p.created_at DESC;
+"""
+
+update = """
+UPDATE projects
+SET
+    name        = COALESCE($1, name),
+    description = COALESCE($2, description),
+    start_date  = COALESCE($3, start_date),
+    end_date    = COALESCE($4, end_date),
+    status      = COALESCE($5, status)
+WHERE id = $6
+RETURNING *;
+"""
+
+update_status = """
+UPDATE projects SET status = $1 WHERE id = $2 RETURNING *;
+"""
+
+delete = """
+DELETE FROM projects WHERE id = $1 RETURNING *;
+"""
+
+get_tasks = """
+SELECT
+    t.*,
+    COUNT(ta.id)                                            AS assignment_count,
+    COALESCE(SUM(ta.allocated_hours), 0)                   AS total_allocated_hours
+FROM tasks t
+LEFT JOIN task_assignments ta ON ta.task_id = t.id
+WHERE t.project_id = $1
+GROUP BY t.id
+ORDER BY
+    CASE t.priority
+        WHEN 'critical' THEN 1
+        WHEN 'high'     THEN 2
+        WHEN 'medium'   THEN 3
+        WHEN 'low'      THEN 4
+    END,
+    t.created_at DESC;
+"""
+
+get_workers = """
+SELECT DISTINCT
+    w.*,
+    COUNT(ta.id)                         AS assignments_in_project,
+    COALESCE(SUM(ta.allocated_hours), 0) AS allocated_hours_in_project
+FROM workers w
+JOIN task_assignments ta ON ta.worker_id = w.id
+JOIN tasks t ON ta.task_id = t.id
+WHERE t.project_id = $1
+GROUP BY w.id
+ORDER BY w.name;
+"""
