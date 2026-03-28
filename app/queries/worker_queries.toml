@@ -33,3 +33,25 @@ ORDER BY w.name;
 update_status = """
 UPDATE workers SET status = $1 WHERE id = $2 RETURNING *;
 """
+
+
+get_emergency_contact = """
+SELECT * FROM worker_emergency_contacts WHERE worker_id = $1;
+"""
+
+upsert_emergency_contact = """
+INSERT INTO worker_emergency_contacts (worker_id, full_name, relationship, phone, email, address)
+VALUES ($1, $2, $3, $4, $5, $6)
+ON CONFLICT (worker_id) DO UPDATE
+SET full_name    = EXCLUDED.full_name,
+    relationship = EXCLUDED.relationship,
+    phone        = EXCLUDED.phone,
+    email        = EXCLUDED.email,
+    address      = EXCLUDED.address,
+    updated_at   = CURRENT_TIMESTAMP
+RETURNING *;
+"""
+
+delete_emergency_contact = """
+DELETE FROM worker_emergency_contacts WHERE worker_id = $1 RETURNING *;
+"""

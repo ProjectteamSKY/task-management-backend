@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form
 from typing import Optional
 from app.services import worker_service
-from app.domain.worker_domain import WorkerCreate
+from app.domain.worker_domain import WorkerCreate, EmergencyContactCreate
 
 router = APIRouter(prefix="/workers", tags=["Workers"])
 
@@ -59,3 +59,32 @@ async def get_worker_assignments(worker_id: int):
 @router.patch("/{worker_id}/status")
 async def update_worker_status(worker_id: int, status: str = Form(...)):
     return await worker_service.update_worker_status(worker_id, status)
+
+
+@router.get("/{worker_id}/emergency-contact")
+async def get_emergency_contact(worker_id: int):
+    return await worker_service.get_emergency_contact(worker_id)
+
+
+@router.put("/{worker_id}/emergency-contact")
+async def upsert_emergency_contact(
+    worker_id:    int,
+    full_name:    str           = Form(...),
+    phone:        str           = Form(...),
+    relationship: Optional[str] = Form(None),
+    email:        Optional[str] = Form(None),
+    address:      Optional[str] = Form(None),
+):
+    data = EmergencyContactCreate(
+        full_name=full_name,
+        relationship=relationship,
+        phone=phone,
+        email=email,
+        address=address,
+    )
+    return await worker_service.upsert_emergency_contact(worker_id, data)
+
+
+@router.delete("/{worker_id}/emergency-contact")
+async def delete_emergency_contact(worker_id: int):
+    return await worker_service.delete_emergency_contact(worker_id)

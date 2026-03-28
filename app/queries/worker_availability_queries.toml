@@ -1,0 +1,58 @@
+[worker_availability]
+
+get_all = """
+SELECT * FROM worker_availability
+WHERE worker_id = $1
+ORDER BY
+    CASE status
+        WHEN 'available'  THEN 1
+        WHEN 'blocked'    THEN 2
+        WHEN 'recurring'  THEN 3
+        WHEN 'leave'      THEN 4
+    END,
+    created_at DESC;
+"""
+
+create = """
+INSERT INTO worker_availability (
+    worker_id, status, day_of_week, start_time, end_time,
+    from_date, to_date, leave_type, reason, approval_status, is_enabled
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING *;
+"""
+
+update = """
+UPDATE worker_availability
+SET
+    day_of_week     = COALESCE($1, day_of_week),
+    start_time      = COALESCE($2, start_time),
+    end_time        = COALESCE($3, end_time),
+    from_date       = COALESCE($4, from_date),
+    to_date         = COALESCE($5, to_date),
+    leave_type      = COALESCE($6, leave_type),
+    reason          = COALESCE($7, reason),
+    is_enabled      = COALESCE($8, is_enabled),
+    updated_at      = NOW()
+WHERE id = $9 AND worker_id = $10
+RETURNING *;
+"""
+
+update_approval = """
+UPDATE worker_availability
+SET approval_status = $1, updated_at = NOW()
+WHERE id = $2 AND worker_id = $3 AND status = 'leave'
+RETURNING *;
+"""
+
+delete = """
+DELETE FROM worker_availability
+WHERE id = $1 AND worker_id = $2
+RETURNING *;
+"""
+
+get_by_status = """
+SELECT * FROM worker_availability
+WHERE worker_id = $1 AND status = $2
+ORDER BY created_at DESC;
+"""

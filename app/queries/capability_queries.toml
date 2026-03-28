@@ -1,0 +1,48 @@
+[capability]
+
+get_by_worker = """
+SELECT *
+FROM worker_capabilities
+WHERE worker_id = $1
+ORDER BY id;
+"""
+
+get_by_id = """
+SELECT *
+FROM worker_capabilities
+WHERE id = $1;
+"""
+
+create_one = """
+INSERT INTO worker_capabilities (worker_id, capability, proficiency)
+VALUES ($1, $2, $3)
+RETURNING *;
+"""
+
+bulk_create = """
+INSERT INTO worker_capabilities (worker_id, capability, proficiency)
+SELECT $1, c.capability, c.proficiency
+FROM jsonb_to_recordset($2::jsonb) AS c(capability text, proficiency int)
+RETURNING *;
+"""
+
+update = """
+UPDATE worker_capabilities
+SET
+    capability  = COALESCE($1, capability),
+    proficiency = COALESCE($2, proficiency)
+WHERE id = $3 AND worker_id = $4
+RETURNING *;
+"""
+
+delete_one = """
+DELETE FROM worker_capabilities
+WHERE id = $1 AND worker_id = $2
+RETURNING *;
+"""
+
+delete_all = """
+DELETE FROM worker_capabilities
+WHERE worker_id = $1
+RETURNING id;
+"""

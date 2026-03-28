@@ -3,8 +3,7 @@ from fastapi.responses import JSONResponse, Response
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.db import init_db
-from app.routers import worker_router, task_router, schedule_router,task_assignment_router,project_router
-from app.services import task_service
+from app.routers import worker_router, task_router, schedule_router,task_assignment_router,project_router,capability_router,worker_availability_router,worker_notes_router,worker_resources_router
 from slack_sdk import WebClient
 from slack_sdk.signature import SignatureVerifier
 import os
@@ -37,6 +36,10 @@ app.include_router(task_router.router)
 app.include_router(schedule_router.router)
 app.include_router(project_router.router)
 app.include_router(task_assignment_router.router)
+app.include_router(capability_router.router)
+app.include_router(worker_availability_router.router)
+app.include_router(worker_notes_router.router)
+app.include_router(worker_resources_router.router)
 
 # ──────────────────────────────────────────
 # Slack Routes

@@ -1,6 +1,6 @@
 from app.core.db import query, execute
 from app.core.loader import load_queries
-from app.domain.worker_domain import WorkerCreate
+from app.domain.worker_domain import WorkerCreate, EmergencyContactCreate, EmergencyContactUpdate
 
 q = load_queries("worker_queries")["worker"]
 
@@ -34,3 +34,23 @@ async def get_workers_with_tasks():
 
 async def update_worker_status(worker_id: int, status: str):
     return await execute(q["update_status"], [status, worker_id], fetch_row=True)
+
+async def get_emergency_contact(worker_id: int):
+    return await query(q["get_emergency_contact"], [worker_id])
+
+async def upsert_emergency_contact(worker_id: int, data: EmergencyContactCreate | EmergencyContactUpdate):
+    return await execute(
+        q["upsert_emergency_contact"],
+        [
+            worker_id,
+            data.full_name,
+            data.relationship,
+            data.phone,
+            data.email,
+            data.address,
+        ],
+        fetch_row=True,
+    )
+
+async def delete_emergency_contact(worker_id: int):
+    return await execute(q["delete_emergency_contact"], [worker_id], fetch_row=True)
