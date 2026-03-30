@@ -18,5 +18,5 @@ class ScheduleCreate(BaseModel):
         start = datetime.combine(self.date, self.start_time)
         end   = datetime.combine(self.date, self.end_time)
         diff_minutes = (end - start).seconds // 60
-        self.duration_units = ceil(diff_minutes / 15)
+        self.duration_units = ceil(diff_minutes / 30)
         return self

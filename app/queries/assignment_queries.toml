@@ -1,8 +1,12 @@
 [assignment]
 
 create = """
-INSERT INTO task_assignments (task_id, worker_id, allocated_hours, assigned_date, status)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO task_assignments (
+    task_id, worker_id, allocated_hours, status,
+    start_date, end_date,
+    start_time, end_time, duration_units
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 """
 
@@ -23,7 +27,7 @@ FROM task_assignments ta
 JOIN workers  w ON ta.worker_id = w.id
 JOIN tasks    t ON ta.task_id   = t.id
 LEFT JOIN projects p ON t.project_id = p.id
-ORDER BY ta.assigned_date DESC;
+ORDER BY ta.start_date DESC;
 """
 
 get_by_id = """
@@ -57,23 +61,23 @@ SELECT
 FROM task_assignments ta
 JOIN workers w ON ta.worker_id = w.id
 WHERE ta.task_id = $1
-ORDER BY ta.assigned_date;
+ORDER BY ta.start_date;
 """
 
 get_by_worker = """
 SELECT
     ta.*,
-    t.title       AS task_title,
-    t.status      AS task_status,
-    t.priority    AS task_priority,
-    t.task_type   AS task_type,
-    t.estimated_hours,
-    p.name        AS project_name
+    t.title           AS task_title,
+    t.status          AS task_status,
+    t.priority        AS task_priority,
+    t.task_type       AS task_type,
+    t.estimated_hours AS estimated_hours,
+    p.name            AS project_name
 FROM task_assignments ta
 JOIN tasks    t ON ta.task_id   = t.id
 LEFT JOIN projects p ON t.project_id = p.id
 WHERE ta.worker_id = $1
-ORDER BY ta.assigned_date DESC;
+ORDER BY ta.start_date DESC;
 """
 
 get_by_status = """
@@ -89,16 +93,20 @@ JOIN workers  w ON ta.worker_id = w.id
 JOIN tasks    t ON ta.task_id   = t.id
 LEFT JOIN projects p ON t.project_id = p.id
 WHERE ta.status = $1
-ORDER BY ta.assigned_date DESC;
+ORDER BY ta.start_date DESC;
 """
 
 update = """
 UPDATE task_assignments
 SET
     allocated_hours = COALESCE($1, allocated_hours),
-    assigned_date   = COALESCE($2, assigned_date),
-    status          = COALESCE($3, status)
-WHERE id = $4
+    status          = COALESCE($2, status),
+    start_date      = COALESCE($3, start_date),
+    end_date        = COALESCE($4, end_date),
+    start_time      = COALESCE($5, start_time),
+    end_time        = COALESCE($6, end_time),
+    duration_units  = COALESCE($7, duration_units)
+WHERE id = $8
 RETURNING *;
 """
 
