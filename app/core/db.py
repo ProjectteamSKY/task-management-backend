@@ -1,6 +1,6 @@
 import asyncpg
 
-DATABASE_URL = "postgresql://btbf_cockroachDB:NRH238juga0bkSJnphKgzw@btbf-cluster-22810.j77.aws-ap-south-1.cockroachlabs.cloud:26257/task_managment?sslmode=require"
+DATABASE_URL = "postgresql://keerthana:Jh9GnMLtPLDj7rTeIZehgA@taskmanagement-24324.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=require"
 _pool = None
 SCHEMA = "task_managment"
 

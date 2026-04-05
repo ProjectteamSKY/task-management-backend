@@ -56,3 +56,19 @@ SELECT * FROM worker_availability
 WHERE worker_id = $1 AND status = $2
 ORDER BY created_at DESC;
 """
+
+get_all_leaves = """
+SELECT wa.*, w.name AS worker_name
+FROM worker_availability wa
+JOIN workers w ON w.id = wa.worker_id
+WHERE wa.status = 'leave'
+ORDER BY wa.from_date DESC;
+"""
+
+get_leaves_by_approval = """
+SELECT * FROM worker_availability
+WHERE worker_id = $1
+  AND status = 'leave'
+  AND approval_status = $2
+ORDER BY from_date DESC;
+"""

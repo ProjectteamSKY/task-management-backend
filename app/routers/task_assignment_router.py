@@ -8,17 +8,15 @@ router = APIRouter(prefix="/assignments", tags=["Assignments"])
 
 @router.post("/")
 async def create_assignment(
-    task_id:         int = Form(...),
-    worker_id:       int = Form(...),
-    allocated_hours: int = Form(...),
-    status:          str = Form("pending"),
-    # Date range
-    start_date:      str = Form(...),
-    end_date:        str = Form(...),
-    # Schedule slot
-    start_time:      str = Form(...),
-    end_time:        str = Form(...),
-    duration_units:  int = Form(2),
+    task_id:         int   = Form(...),
+    worker_id:       int   = Form(...),
+    allocated_hours: float = Form(...),   # ✅ int → float
+    status:          str   = Form("pending"),
+    start_date:      str   = Form(...),
+    end_date:        str   = Form(...),
+    start_time:      str   = Form(...),
+    end_time:        str   = Form(...),
+    duration_units:  float = Form(2.0),   # ✅ int → float
 ):
     data = AssignmentCreate(
         task_id=task_id,
@@ -62,15 +60,13 @@ async def get_assignment(assignment_id: int):
 @router.patch("/{assignment_id}")
 async def update_assignment(
     assignment_id:   int,
-    allocated_hours: Optional[int] = Form(None),
-    status:          Optional[str] = Form(None),
-    # Date range
-    start_date:      Optional[str] = Form(None),
-    end_date:        Optional[str] = Form(None),
-    # Schedule slot
-    start_time:      Optional[str] = Form(None),
-    end_time:        Optional[str] = Form(None),
-    duration_units:  Optional[int] = Form(None),
+    allocated_hours: Optional[float] = Form(None),   # ✅ int → float
+    status:          Optional[str]   = Form(None),
+    start_date:      Optional[str]   = Form(None),
+    end_date:        Optional[str]   = Form(None),
+    start_time:      Optional[str]   = Form(None),
+    end_time:        Optional[str]   = Form(None),
+    duration_units:  Optional[float] = Form(None),   # ✅ int → float
 ):
     data = AssignmentUpdate(
         allocated_hours=allocated_hours,
